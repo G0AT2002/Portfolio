@@ -1,0 +1,877 @@
+/* ==========================================================================
+   styles.css — layout and theme. You normally do NOT need to edit this file:
+   all text and project data lives in data.js.
+
+   Want to change the accent colour? Edit --accent below. Everything follows.
+   ========================================================================== */
+
+/* ---------- 1. Design tokens ---------------------------------------- */
+:root {
+  /* The single accent colour. Try #22e5c1 (teal), #35e07a (matrix green)
+     or #2bd6ff (electric cyan). */
+  --accent: #22e5c1;
+  --accent-soft: rgba(34, 229, 193, 0.13);
+  --accent-line: rgba(34, 229, 193, 0.38);
+  --accent-glow: rgba(34, 229, 193, 0.16);
+
+  --bg: #070a0c;
+  --bg-header: rgba(7, 10, 12, 0.82);
+  --surface: #0c1114;
+  --surface-2: #101619;
+
+  --text: #dde5e8;
+  --muted: #94a3ab;
+  --dim: #64757d;
+
+  --line: rgba(148, 176, 184, 0.14);
+  --line-strong: rgba(148, 176, 184, 0.26);
+
+  --mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, "SF Mono",
+          Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+          Arial, sans-serif;
+
+  --radius: 10px;
+  --wrap: 1120px;
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+/* ---------- 2. Reset / base ----------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ==========================================================================
+   BACKGROUND STACK
+   --------------------------------------------------------------------------
+   Four fixed, non-interactive layers build the depth. Back to front:
+
+     html::before   coarse 184px grid + edge vignette   (z -4)
+     html::after    film grain, inline SVG noise        (z -3)
+     body::before   fine 46px grid                      (z -2)
+     body::after    accent blooms + static scanlines    (z -1)
+     .bg-sweep      one slow scanline drift             (z -1)
+
+   Everything is gradients or a tiny data: URI — no images, no extra requests.
+   Colours all come from the existing tokens; nothing new is introduced.
+   ========================================================================== */
+
+/* Layer 1 — coarse grid for parallax-ish depth behind the fine one, plus a
+   vignette that darkens the edges so the content column sits forward. */
+html::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -4;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(148, 176, 184, 0.020) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 176, 184, 0.020) 1px, transparent 1px),
+    radial-gradient(140% 100% at 50% 40%, transparent 45%, rgba(0, 0, 0, 0.55) 100%);
+  background-size: 184px 184px, 184px 184px, 100% 100%;
+}
+
+/* Layer 2 — a whisper of film grain. Stops the large flat areas from banding
+   and gives the dark background some texture. */
+html::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+/* Layer 3 — the original fine blueprint grid, fading out down the page. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(148, 176, 184, 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 176, 184, 0.055) 1px, transparent 1px);
+  background-size: 46px 46px;
+  -webkit-mask-image: radial-gradient(120% 90% at 50% 0%, #000 0%, transparent 78%);
+          mask-image: radial-gradient(120% 90% at 50% 0%, #000 0%, transparent 78%);
+}
+
+/* Layer 4 — accent blooms and static scanlines. The bloom behind the header
+   is now answered by a fainter one low on the right, so the page has light at
+   both ends instead of fading into flat black. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(720px 340px at 12% -8%, var(--accent-glow), transparent 70%),
+    radial-gradient(620px 380px at 92% 108%, rgba(34, 229, 193, 0.07), transparent 72%),
+    repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.016) 0 1px, transparent 1px 3px);
+}
+
+/* Layer 5 — a single soft band that drifts down the screen roughly every
+   14 seconds, like a CRT refresh. Deliberately almost invisible: it reads as
+   the page being "live" rather than as an animation. */
+.bg-sweep {
+  position: fixed;
+  inset: -20% 0 auto 0;
+  height: 42vh;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(34, 229, 193, 0.028) 45%,
+    rgba(34, 229, 193, 0.045) 50%,
+    rgba(34, 229, 193, 0.028) 55%,
+    transparent 100%);
+  animation: bg-sweep 14s linear infinite;
+  will-change: transform;
+}
+@keyframes bg-sweep {
+  from { transform: translate3d(0, -60vh, 0); }
+  to   { transform: translate3d(0, 160vh, 0); }
+}
+
+img, svg { max-width: 100%; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.wrap {
+  width: 100%;
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding-inline: clamp(18px, 5vw, 40px);
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 10px 16px;
+  background: var(--accent);
+  color: #04110d;
+  font: 600 13px/1 var(--mono);
+}
+.skip-link:focus { left: 12px; top: 12px; }
+
+/* ---------- 3. Header ----------------------------------------------- */
+.site-header {
+  position: relative;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(34, 229, 193, 0.045), transparent 60%);
+}
+
+.header-inner {
+  display: flex;
+  flex-wrap: nowrap;          /* stacking is handled by the 860px breakpoint */
+  gap: 32px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-top: clamp(38px, 7vw, 68px);
+  padding-bottom: clamp(26px, 4vw, 38px);
+}
+
+/* lets the identity column shrink instead of shoving the contacts out of line */
+.identity { min-width: 0; }
+
+.prompt-line {
+  margin: 0 0 10px;
+  font: 400 12.5px/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.prompt-sigil { color: var(--accent); }
+
+.name {
+  margin: 0;
+  font: 600 clamp(30px, 5.6vw, 47px)/1.08 var(--mono);
+  letter-spacing: -0.015em;
+  color: #f2f7f8;
+}
+
+.tagline {
+  margin: 12px 0 0;
+  font: 500 clamp(16px, 2.5vw, 20px)/1.35 var(--mono);
+  color: var(--accent);
+  letter-spacing: 0.01em;
+}
+
+/* Blinking terminal cursor after the tagline. */
+.cursor {
+  display: inline-block;
+  width: 0.58em;
+  height: 1.05em;
+  margin-left: 0.35em;
+  vertical-align: -0.14em;
+  background: var(--accent);
+  animation: blink 1.15s steps(2, start) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.subline {
+  margin: 10px 0 0;
+  max-width: 52ch;
+  color: var(--muted);
+  font-size: 14.5px;
+}
+
+.location {
+  margin: 6px 0 0;
+  font: 500 13px/1.5 var(--mono);
+  color: var(--dim);
+}
+.location::before {
+  content: "◆ ";
+  color: var(--accent);
+  opacity: 0.75;
+}
+
+.header-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
+  flex: 0 0 auto;   /* keep the toggle + contacts pinned to the right */
+}
+
+/* EN / FR toggle */
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font: 600 12px/1 var(--mono);
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: border-color 0.18s var(--ease), box-shadow 0.18s var(--ease);
+}
+.lang-toggle:hover {
+  border-color: var(--accent-line);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.lang-opt {
+  padding: 5px 11px;
+  border-radius: 999px;
+  transition: background-color 0.18s var(--ease), color 0.18s var(--ease);
+}
+.lang-opt[data-active="true"] {
+  background: var(--accent);
+  color: #04110d;
+}
+.lang-sep { color: var(--dim); font-weight: 400; }
+
+.contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.contact {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.015);
+  color: var(--text);
+  font: 500 13px/1 var(--mono);
+  transition: border-color 0.18s var(--ease), color 0.18s var(--ease),
+              background-color 0.18s var(--ease);
+}
+.contact:hover {
+  border-color: var(--accent-line);
+  color: var(--accent);
+  background: var(--accent-soft);
+  text-decoration: none;
+}
+.contact svg { width: 15px; height: 15px; flex: none; }
+
+/* Sticky in-page nav */
+.section-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-top: 1px solid var(--line);
+  background: var(--bg-header);
+  -webkit-backdrop-filter: blur(9px);
+          backdrop-filter: blur(9px);
+}
+.section-nav-inner { display: flex; gap: 26px; }
+.section-nav a {
+  padding: 13px 0;
+  color: var(--muted);
+  font: 500 12.5px/1 var(--mono);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  border-bottom: 2px solid transparent;
+  transition: color 0.18s var(--ease), border-color 0.18s var(--ease);
+}
+.section-nav a:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  text-decoration: none;
+}
+
+/* ---------- 4. Sections --------------------------------------------- */
+.section { padding: clamp(46px, 7vw, 78px) 0; }
+.section + .section { border-top: 1px solid var(--line); }
+
+.section-title {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 0 0 6px;
+  font: 600 clamp(19px, 3vw, 24px)/1.2 var(--mono);
+  letter-spacing: 0.01em;
+  color: #eef4f5;
+}
+.section-num {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  opacity: 0.8;
+}
+.section-note {
+  margin: 0 0 26px;
+  color: var(--dim);
+  font: 400 13px/1.6 var(--mono);
+}
+
+.subsection-title {
+  margin: 54px 0 6px;
+  font: 600 15px/1.3 var(--mono);
+  letter-spacing: 0.06em;
+  color: #eef4f5;
+}
+.subsection-title::before {
+  content: "// ";
+  color: var(--accent);
+  opacity: 0.7;
+}
+
+/* ---------- 5. About ------------------------------------------------ */
+.about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: clamp(26px, 5vw, 56px);
+  align-items: start;
+  margin-top: 18px;
+}
+.about-text p {
+  margin: 0 0 15px;
+  max-width: 62ch;
+  color: #cfd9dd;
+}
+.about-text p:last-child { margin-bottom: 0; }
+
+/* section headings inside the About copy (Technical experience, etc.) */
+.about-heading {
+  margin: 26px 0 9px;
+  font: 600 11.5px/1.3 var(--mono);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.about-heading::before {
+  content: "▸ ";
+  opacity: 0.8;
+}
+
+.highlights {
+  margin: 0;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--accent-line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.highlights dt {
+  font: 600 11px/1 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 5px;
+}
+.highlights dd {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.highlights dd:last-child { margin-bottom: 0; }
+
+/* ---------- 6. Cards ------------------------------------------------ */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 18px;
+}
+.card-grid-compact {
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  margin-top: 22px;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 20px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease),
+              transform 0.2s var(--ease);
+}
+.card.is-openable { cursor: pointer; }
+.card.is-openable:hover,
+.card.is-openable:focus-within {
+  border-color: var(--accent-line);
+  box-shadow: 0 0 0 1px var(--accent-soft), 0 10px 30px -18px var(--accent),
+              0 0 26px -10px var(--accent-glow);
+  transform: translateY(-2px);
+}
+
+/* thin scan line that lights up along the top edge on hover */
+.card.is-openable::after {
+  content: "";
+  position: absolute;
+  inset: -1px -1px auto;
+  height: 1px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity 0.2s var(--ease);
+}
+.card.is-openable:hover::after,
+.card.is-openable:focus-within::after { opacity: 0.9; }
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.card-num {
+  font: 600 11px/1 var(--mono);
+  letter-spacing: 0.16em;
+  color: var(--dim);
+}
+.card-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 600 10.5px/1 var(--mono);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.card-status svg { width: 12px; height: 12px; }
+.card-status.is-pending { color: var(--dim); }
+
+.card-title { margin: 0; font: 600 17px/1.35 var(--mono); letter-spacing: -0.005em; }
+.card-title a { color: #f0f6f7; }
+.card-title a:hover { color: var(--accent); text-decoration: none; }
+.card.is-pending .card-title { color: #b9c5c9; }
+
+.card-context {
+  margin: -6px 0 0;
+  font: 400 12px/1.4 var(--mono);
+  color: var(--dim);
+}
+.card-summary {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+/* Terminal-token tags */
+.tags { display: flex; flex-wrap: wrap; gap: 7px; margin: 2px 0 0; padding: 0; list-style: none; }
+.tag {
+  padding: 4px 9px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: rgba(148, 176, 184, 0.05);
+  color: var(--muted);
+  font: 500 11.5px/1.35 var(--mono);
+  white-space: nowrap;
+}
+.tag::before { content: "#"; color: var(--accent); opacity: 0.6; margin-right: 2px; }
+
+/* File links */
+.card-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line);
+}
+.file-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text);
+  font: 500 12px/1 var(--mono);
+  transition: border-color 0.16s var(--ease), color 0.16s var(--ease),
+              background-color 0.16s var(--ease);
+}
+.file-link:hover {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent);
+  text-decoration: none;
+}
+.file-link svg { width: 13px; height: 13px; flex: none; opacity: 0.8; }
+
+.file-link.is-disabled {
+  border-style: dashed;
+  color: var(--dim);
+  background: none;
+  cursor: not-allowed;
+}
+.card.is-pending { opacity: 0.78; }
+
+/* ---------- 7. Skills ---------------------------------------------- */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 22px;
+}
+.skill-group {
+  padding: 18px 18px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.skill-group h3 {
+  margin: 0 0 12px;
+  font: 600 11.5px/1 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.skill-list { display: flex; flex-wrap: wrap; gap: 7px; margin: 0; padding: 0; list-style: none; }
+.skill-list li {
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: #c6d1d5;
+  font: 500 12.5px/1.3 var(--mono);
+  transition: border-color 0.16s var(--ease), color 0.16s var(--ease);
+}
+.skill-list li:hover { border-color: var(--accent-line); color: var(--accent); }
+
+/* ---------- 7b. Certifications -------------------------------------- */
+.cert-grid {
+  display: grid;
+  /* min() keeps the track from forcing a 320px column on a narrower screen */
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  gap: 10px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.cert {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  transition: border-color 0.18s var(--ease), background-color 0.18s var(--ease);
+}
+.cert:hover { border-left-color: var(--accent); background: var(--surface-2); }
+
+.cert-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 600 13.5px/1.4 var(--mono);
+  color: #eaf1f2;
+}
+a.cert-name:hover { color: var(--accent); text-decoration: none; }
+.cert-name svg { width: 12px; height: 12px; flex: none; opacity: 0.7; }
+
+.cert-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  font: 400 12px/1.4 var(--mono);
+  color: var(--dim);
+}
+.cert-issuer { color: var(--muted); }
+.cert-date::before { content: "· "; }
+
+/* the not-yet-earned one is marked, not hidden */
+.cert.is-pending {
+  border-left-color: var(--accent);
+  background: linear-gradient(90deg, var(--accent-soft), var(--surface) 60%);
+}
+.cert.is-pending .cert-name { color: var(--accent); }
+
+/* ---------- 7c. TryHackMe badges ------------------------------------ */
+#tryhackme .subsection-title { margin-top: 44px; }
+
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px 12px 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  color: var(--text);
+  font: 600 13.5px/1.3 var(--mono);
+  transition: border-color 0.18s var(--ease), box-shadow 0.18s var(--ease),
+              transform 0.18s var(--ease);
+}
+.badge:hover {
+  border-color: var(--accent-line);
+  box-shadow: 0 0 0 1px var(--accent-soft), 0 10px 26px -18px var(--accent);
+  transform: translateY(-2px);
+  text-decoration: none;
+  color: var(--accent);
+}
+.badge-img { width: 44px; height: 44px; flex: none; }
+.badge-name { white-space: nowrap; }
+.badge svg:not(.badge-img) { width: 12px; height: 12px; opacity: 0.55; flex: none; }
+.badge:hover svg:not(.badge-img) { opacity: 1; }
+
+@media (max-width: 420px) {
+  .badge-row { flex-direction: column; }
+  .badge { width: 100%; }
+}
+
+/* ---------- 8. Footer ---------------------------------------------- */
+.site-footer {
+  border-top: 1px solid var(--line);
+  padding: 30px 0 42px;
+}
+.footer-inner p {
+  margin: 0;
+  font: 400 12.5px/1.6 var(--mono);
+  color: var(--dim);
+}
+.footer-note { margin-top: 4px; }
+
+/* ---------- 8b. Small cyber details --------------------------------- */
+
+/* Text selection picks up the accent instead of the browser default blue. */
+::selection { background: var(--accent); color: #04110d; }
+::-moz-selection { background: var(--accent); color: #04110d; }
+
+/* Thin dark scrollbar with an accent thumb, so the chrome matches the page. */
+* { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border: 3px solid var(--bg);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--accent-line); }
+
+/* HUD read-out: a hairline progress bar pinned to the very top of the
+   viewport. Width is set by app.js on scroll. */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  z-index: 40;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--accent));
+  box-shadow: 0 0 10px -2px var(--accent);
+}
+
+/* Corner brackets that snap in on card hover — a targeting-reticle nod that
+   costs nothing and disappears when you are not pointing at the card. */
+.card.is-openable .card-top::before,
+.card.is-openable .card-files::after {
+  content: "";
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  opacity: 0;
+  transition: opacity 0.2s var(--ease);
+  pointer-events: none;
+}
+.card.is-openable .card-top::before {
+  top: 7px; left: 7px;
+  border-top: 1px solid var(--accent);
+  border-left: 1px solid var(--accent);
+}
+.card.is-openable .card-files::after {
+  bottom: 7px; right: 7px;
+  border-bottom: 1px solid var(--accent);
+  border-right: 1px solid var(--accent);
+}
+.card.is-openable:hover .card-top::before,
+.card.is-openable:hover .card-files::after,
+.card.is-openable:focus-within .card-top::before,
+.card.is-openable:focus-within .card-files::after { opacity: 0.75; }
+
+/* The not-yet-earned certification gets a slow breathing dot, so "in
+   progress" reads as a live state rather than a label. */
+.cert.is-pending .cert-name::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 2px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: cert-pulse 2.4s ease-in-out infinite;
+}
+@keyframes cert-pulse {
+  0%, 100% { opacity: 0.25; box-shadow: 0 0 0 0 var(--accent-soft); }
+  50%      { opacity: 1;    box-shadow: 0 0 0 4px transparent; }
+}
+
+/* A closing prompt so the page ends the way it opened. */
+.footer-prompt {
+  margin: 0 0 8px !important;
+  font: 400 12.5px/1.6 var(--mono);
+  color: var(--dim);
+}
+.footer-prompt::before { content: "> "; color: var(--accent); }
+
+/* ---------- 8c. Language-switch glitch ------------------------------ */
+
+/* Fires for ~320ms when EN/FR is pressed. app.js adds .is-glitching to
+   <body> and removes it when the animation is done. */
+.glitch-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    repeating-linear-gradient(to bottom,
+      rgba(34, 229, 193, 0.05) 0 2px, transparent 2px 5px);
+}
+body.is-glitching .glitch-veil { animation: veil-flicker 0.32s steps(3) 1; }
+@keyframes veil-flicker {
+  0%   { opacity: 0.9; transform: translateY(-2px); }
+  40%  { opacity: 0.35; transform: translateY(3px); }
+  70%  { opacity: 0.6; transform: translateY(-1px); }
+  100% { opacity: 0; transform: none; }
+}
+
+/* Headings tear apart briefly. The split uses the accent and a cool white —
+   no new palette colours, and it is gone before you can read it as colour. */
+body.is-glitching .name,
+body.is-glitching .tagline,
+body.is-glitching .section-title,
+body.is-glitching .card-title,
+body.is-glitching .subsection-title {
+  animation: glitch-tear 0.32s steps(2) 1;
+}
+@keyframes glitch-tear {
+  0%   { transform: translate3d(0,0,0);     text-shadow: none; }
+  20%  { transform: translate3d(-3px,0,0);  text-shadow: 2px 0 var(--accent), -2px 0 rgba(190, 235, 255, 0.75); }
+  45%  { transform: translate3d(2px,0,0);   text-shadow: -3px 0 var(--accent), 3px 0 rgba(190, 235, 255, 0.55); }
+  70%  { transform: translate3d(-1px,0,0);  text-shadow: 1px 0 var(--accent); }
+  100% { transform: translate3d(0,0,0);     text-shadow: none; }
+}
+
+/* The toggle itself takes a quick hit so the click feels connected. */
+body.is-glitching .lang-toggle { animation: glitch-kick 0.32s steps(2) 1; }
+@keyframes glitch-kick {
+  0%, 100% { transform: none; }
+  30%      { transform: translate3d(-2px, 1px, 0); }
+  60%      { transform: translate3d(2px, -1px, 0); }
+}
+
+/* ---------- 9. Responsive ------------------------------------------ */
+@media (max-width: 860px) {
+  .about-grid { grid-template-columns: 1fr; }
+  .header-inner { flex-direction: column; flex-wrap: wrap; align-items: flex-start; gap: 22px; }
+  .header-side { align-items: flex-start; width: 100%; }
+  .contacts { justify-content: flex-start; }
+}
+
+@media (max-width: 560px) {
+  body { font-size: 15.5px; }
+  .card-grid, .card-grid-compact, .cert-grid { grid-template-columns: 1fr; }
+  .section-nav-inner { gap: 18px; overflow-x: auto; scrollbar-width: none; }
+  .section-nav-inner::-webkit-scrollbar { display: none; }
+  .contact { font-size: 12.5px; padding: 6px 11px; }
+  .card { padding: 17px 16px 15px; }
+  .highlights { padding: 18px; }
+}
+
+/* ---------- 10. Accessibility preferences -------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .cursor { opacity: 1; }
+  /* the drifting sweep is decoration only — remove it rather than freeze it
+     mid-screen, where it would read as an unexplained band */
+  .bg-sweep { display: none; }
+  /* the glitch is suppressed in app.js too, but belt and braces */
+  .glitch-veil { display: none; }
+  .cert.is-pending .cert-name::after { animation: none; opacity: 1; }
+}
+
+@media print {
+  html::before, html::after, body::before, body::after,
+  .bg-sweep, .glitch-veil, .scroll-progress,
+  .section-nav, .lang-toggle { display: none; }
+  body { background: #fff; color: #111; }
+  .card, .skill-group, .highlights { border-color: #ccc; background: #fff; }
+  .name, .card-title a, .section-title { color: #111; }
+}

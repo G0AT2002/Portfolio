@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- The tab title is set from data.js (ui.pageTitle). This is only the fallback. -->
+<title>Marco Hélie — Blue Team / SOC Analyst</title>
+<meta name="description" content="Marco Hélie — Cybersecurity Analyst, Blue Team & SOC Operations. Bilingual FR/EN, based in Canada and open to remote. SIEM, threat detection, incident response.">
+<meta name="color-scheme" content="dark">
+<meta name="author" content="Marco Hélie">
+
+<!--
+  Keep this page out of search results. The site stays publicly reachable by
+  URL — this only tells search engines not to list it.
+
+  This tag is what actually does the work (robots.txt cannot, see robots.txt).
+  It does NOT affect the social preview below: LinkedIn, Twitter and Facebook
+  crawlers read Open Graph tags and ignore robots meta directives, which are
+  search-indexing instructions only.
+-->
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
+
+<!--
+  SOCIAL PREVIEW (Open Graph + Twitter). These MUST stay in the raw HTML:
+  LinkedIn, Facebook and Slack read them without running JavaScript, so they
+  cannot be generated from data.js like the rest of the page.
+
+  If you change your name, tagline or the site URL in data.js, update these
+  four lines to match. The og:url must be the live GitHub Pages address.
+-->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://g0at2002.github.io/Portfolio/">
+<meta property="og:title" content="Marco Hélie — Cybersecurity Analyst | Blue Team &amp; SOC Operations">
+<meta property="og:description" content="SIEM, threat detection and incident response. Bilingual FR/EN, based in Canada and open to remote & relocation. CompTIA Security+ candidate.">
+<meta property="og:image" content="https://g0at2002.github.io/Portfolio/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="en_CA">
+<meta property="og:locale:alternate" content="fr_CA">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Marco Hélie — Cybersecurity Analyst | Blue Team &amp; SOC Operations">
+<meta name="twitter:description" content="SIEM, threat detection and incident response. Bilingual FR/EN, open to remote & relocation.">
+<meta name="twitter:image" content="https://g0at2002.github.io/Portfolio/assets/og-image.png">
+
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/favicon.svg">
+<link rel="stylesheet" href="styles.css">
+
+<!--
+  NOTE ON FONTS: no external requests are made, so the page works offline and
+  loads instantly. The CSS asks for JetBrains Mono / Fira Code and falls back to
+  the system monospace font if they are not installed. If you ever WANT the
+  webfont, uncomment the two lines below (this adds a request to Google Fonts):
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap">
+-->
+</head>
+<body>
+
+<!-- Icon definitions, used by <use href="#icon-..."> below. Never displayed itself. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="icon-github" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/>
+    </symbol>
+    <symbol id="icon-file" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+            d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7zM14 3v4h4"/>
+    </symbol>
+    <symbol id="icon-arrow" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            d="M7 17 17 7M9 7h8v8"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- Background layer: slow CRT-style sweep. Purely decorative, see styles.css. -->
+<div class="bg-sweep" aria-hidden="true"></div>
+
+<!-- Scanline veil, flashed for ~320ms when the EN/FR toggle is pressed. -->
+<div class="glitch-veil" aria-hidden="true"></div>
+
+<!-- Hairline read-progress bar; width is set by app.js on scroll. -->
+<div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+
+<a class="skip-link" href="#main" data-i18n="ui.skipToContent">Skip to content</a>
+
+<!-- ===================== HEADER ===================== -->
+<header class="site-header">
+  <div class="wrap header-inner">
+
+    <div class="identity">
+      <p class="prompt-line" aria-hidden="true"><span class="prompt-sigil">&gt;</span> whoami</p>
+      <h1 class="name" data-bind="profile.name">Marco Hélie</h1>
+      <p class="tagline">
+        <span data-i18n="profile.tagline">Blue Team / SOC Analyst</span><span class="cursor" aria-hidden="true"></span>
+      </p>
+      <p class="subline" data-i18n="profile.subline"></p>
+      <p class="location" data-i18n="profile.location"></p>
+    </div>
+
+    <div class="header-side">
+      <button id="lang-toggle" class="lang-toggle" type="button" aria-live="polite">
+        <span class="lang-opt" data-lang-opt="en">EN</span>
+        <span class="lang-sep" aria-hidden="true">/</span>
+        <span class="lang-opt" data-lang-opt="fr">FR</span>
+      </button>
+      <nav class="contacts" id="contacts" aria-label="Contact"></nav>
+    </div>
+
+  </div>
+  <nav class="section-nav" aria-label="Sections">
+    <div class="wrap section-nav-inner">
+      <a href="#about" data-i18n="ui.nav.about">About</a>
+      <a href="#projects" data-i18n="ui.nav.projects">Projects</a>
+      <a href="#skills" data-i18n="ui.nav.skills">Skills</a>
+      <a href="#certifications" data-i18n="ui.nav.certifications">Certifications</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+
+  <!-- ===================== ABOUT ===================== -->
+  <section id="about" class="section">
+    <div class="wrap">
+      <h2 class="section-title"><span class="section-num">01</span><span data-i18n="ui.sections.about">About</span></h2>
+      <div class="about-grid">
+        <div class="about-text" id="about-text"></div>
+        <dl class="highlights" id="about-highlights"></dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PROJECTS ===================== -->
+  <section id="projects" class="section">
+    <div class="wrap">
+      <h2 class="section-title"><span class="section-num">02</span><span data-i18n="ui.sections.projects">Projects</span></h2>
+      <p class="section-note" data-i18n="ui.sections.projectsNote"></p>
+
+      <!-- Cards are generated from SITE.projects in data.js -->
+      <div class="card-grid" id="project-grid"></div>
+
+      <h3 class="subsection-title" data-i18n="ui.sections.documents">Reports / Documents</h3>
+      <p class="section-note" data-i18n="ui.sections.documentsNote"></p>
+
+      <!-- Cards are generated from SITE.documents in data.js -->
+      <div class="card-grid card-grid-compact" id="document-grid"></div>
+    </div>
+  </section>
+
+  <!-- ===================== SKILLS ===================== -->
+  <section id="skills" class="section">
+    <div class="wrap">
+      <h2 class="section-title"><span class="section-num">03</span><span data-i18n="ui.sections.skills">Skills &amp; Tools</span></h2>
+      <div class="skills-grid" id="skills-grid"></div>
+    </div>
+  </section>
+
+  <!-- ===================== CERTIFICATIONS ===================== -->
+  <section id="certifications" class="section">
+    <div class="wrap">
+      <h2 class="section-title"><span class="section-num">04</span><span data-i18n="ui.sections.certifications">Certifications &amp; Training</span></h2>
+      <p class="section-note" data-i18n="ui.sections.certificationsNote"></p>
+
+      <!-- Generated from SITE.certifications in data.js -->
+      <ul class="cert-grid" id="cert-grid"></ul>
+
+      <!-- Generated from SITE.tryhackme in data.js -->
+      <div id="tryhackme"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p class="footer-prompt" aria-hidden="true">exit 0</p>
+    <p><span data-bind="profile.name"></span> · <span id="footer-year"></span></p>
+    <p class="footer-note" data-i18n="ui.footer"></p>
+  </div>
+</footer>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

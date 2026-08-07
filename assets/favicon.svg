@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Favicon: a shield with a terminal prompt inside. Change the two colours
+       below if you change the accent colour in styles.css. -->
+  <rect width="64" height="64" rx="14" fill="#070a0c"/>
+  <path d="M32 8 52 15v18c0 12-8.4 19.8-20 23-11.6-3.2-20-11-20-23V15z"
+        fill="none" stroke="#22e5c1" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M23 27l6 6-6 6" fill="none" stroke="#22e5c1" stroke-width="4"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M34 39h9" fill="none" stroke="#22e5c1" stroke-width="4" stroke-linecap="round"/>
+</svg>
